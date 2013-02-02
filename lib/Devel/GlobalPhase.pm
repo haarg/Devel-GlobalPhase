@@ -110,19 +110,25 @@ Devel::GlobalPhase - Detect perl's global phase on older perls.
 
 =head1 DESCRIPTION
 
-Gives you the value L<perlvar/${^GLOBAL_PHASE}> would in perls it doesn't exist in.
-The built in variable will be used if it is available.
+Gives you the value L<perlvar/${^GLOBAL_PHASE}> would in perls it
+doesn't exist in. The built in variable will be used if it is
+available.
+
+If all that is needed is detecting global destruction,
+L<Devel::GlobalDestruction> should be used instead of this module.
 
 =head1 EXPORTS
 
 =head2 global_phase
+
+Returns the global phase either from ${^GLOBAL_PHASE} or by calculating it.
 
 =head1 OPTIONS
 
 =head2 -var
 
 If this option is specified on import, the global variable
-${^GLOBAL_PHASE} will be created if it doesn't exist, emulating the
+C<${^GLOBAL_PHASE}> will be created if it doesn't exist, emulating the
 built in variable from newer perls.
 
 =head1 BUGS
