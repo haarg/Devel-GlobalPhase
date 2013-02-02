@@ -135,7 +135,7 @@ haarg - Graham Knop (cpan:HAARG) <haarg@haarg.org>
 
 =head2 CONTRIBUTORS
 
-None yet.
+Uses some code taken from L<Devel::GlobalDestruction>.
 
 =head1 COPYRIGHT
 
