@@ -42,8 +42,9 @@ if (B::main_start()->isa('B::NULL')) {
     # compile time
     eval q[
         CHECK { $global_phase = 'CHECK' }
+        # try to install an END block as late as possible so it will run first.
+        INIT { eval q(END { $global_phase = 'END' }) }
         # INIT is FIFO so we can force our sub to be first
-        INIT { }
         unshift @{ B::init_av()->object_2svref }, sub { $global_phase = 'INIT' };
         1;
     ] or die $@;
@@ -67,12 +68,22 @@ sub global_phase () {
         $global_phase = 'RUN';
     }
     if ($global_phase eq 'RUN') {
-        my $depth = 0;
-        # checking sub names seems to be the only way to detect END reliably
-        while (my $sub = (caller(++$depth))[3]) {
-            if ($sub =~ /::END$/) {
+        # END blocks are FILO so we can't install one to run first.
+        # only way to detect END reliably seems to be by using caller.
+        # top two frames will be an eval and the END block.
+        my $i;
+        1 while CORE::caller(++$i);
+        if ($i > 2) {
+            my @top = CORE::caller($i - 1);
+            my @next = CORE::caller($i - 2);
+            if (
+                $top[3] eq '(eval)'
+                && $top[2] == $next[2]
+                && $top[1] eq $next[1]
+                && $top[0] eq 'main'
+                && $next[0] eq 'main'
+            ) {
                 $global_phase = 'END';
-                last;
             }
         }
     }
