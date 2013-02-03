@@ -39,17 +39,18 @@ else {
 
 my $global_phase = 'START';
 if (B::main_start()->isa('B::NULL')) {
-    # compile time
-    eval q[
+    # loaded during initial compile
+    eval <<'END_EVAL' or die $@;
         CHECK { $global_phase = 'CHECK' }
         # try to install an END block as late as possible so it will run first.
         INIT { eval q(END { $global_phase = 'END' }) }
         # INIT is FIFO so we can force our sub to be first
         unshift @{ B::init_av()->object_2svref }, sub { $global_phase = 'INIT' };
         1;
-    ] or die $@;
+END_EVAL
 }
 else {
+    # loaded during runtime
     $global_phase = 'RUN';
 }
 END { $global_phase = 'END' }
@@ -57,6 +58,8 @@ END { $global_phase = 'END' }
 use Carp ();
 sub global_phase () {
     if ($global_phase eq 'START') {
+        # we use a CHECK block to set this as well, but we can't force
+        # ours to run before other CHECKS
         if (!B::main_root()->isa('B::NULL') && B::main_cv()->DEPTH == 0) {
             $global_phase = 'CHECK';
         }
@@ -121,9 +124,9 @@ Devel::GlobalPhase - Detect perl's global phase on older perls.
 
 =head1 DESCRIPTION
 
-Gives you the value L<perlvar/${^GLOBAL_PHASE}> would in perls it
-doesn't exist in. The built in variable will be used if it is
-available.
+Gives you the value L<perlvar/${^GLOBAL_PHASE}|${^GLOBAL_PHASE}>
+would in perls it doesn't exist in. The built in variable will be
+used if it is available.
 
 If all that is needed is detecting global destruction,
 L<Devel::GlobalDestruction> should be used instead of this module.
@@ -132,7 +135,7 @@ L<Devel::GlobalDestruction> should be used instead of this module.
 
 =head2 global_phase
 
-Returns the global phase either from ${^GLOBAL_PHASE} or by calculating it.
+Returns the global phase either from C<${^GLOBAL_PHASE}> or by calculating it.
 
 =head1 OPTIONS
 
@@ -144,7 +147,8 @@ built in variable from newer perls.
 
 =head1 BUGS
 
-There are tricks that can be played with B that would fool this module.
+There are tricks that can be played with B that would fool this
+module for the INIT phase.
 
 =head1 AUTHOR
 
