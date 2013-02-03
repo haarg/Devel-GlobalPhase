@@ -99,7 +99,9 @@ sub Tie::GlobalPhase::STORE { die "Modification of a read-only value attempted";
 *Tie::GlobalPhase::FETCH = \&global_phase;
 
 sub tie_global_phase {
-    tie ${^GLOBAL_PHASE}, 'Tie::GlobalPhase';
+    unless (defined ${^GLOBAL_PHASE}) {
+        tie ${^GLOBAL_PHASE}, 'Tie::GlobalPhase';
+    }
 }
 
 1;
