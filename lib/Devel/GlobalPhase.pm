@@ -128,8 +128,8 @@ Devel::GlobalPhase - Detect perl's global phase on older perls.
 
 =head1 DESCRIPTION
 
-Gives you the value L<perlvar/${^GLOBAL_PHASE}|${^GLOBAL_PHASE}>
-would in perls it doesn't exist in. The built in variable will be
+This gives access to L<perlvar/${^GLOBAL_PHASE}|${^GLOBAL_PHASE}>
+in versions of perl that don't provide it. The built in variable will be
 used if it is available.
 
 If all that is needed is detecting global destruction,
