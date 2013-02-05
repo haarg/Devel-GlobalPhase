@@ -73,7 +73,8 @@ sub global_phase () {
     if ($global_phase eq 'RUN') {
         # END blocks are FILO so we can't install one to run first.
         # only way to detect END reliably seems to be by using caller.
-        # top two frames will be an eval and the END block.
+        # I hate this but it seems to be the best available option.
+        # The top two frames will be an eval and the END block.
         my $i;
         1 while CORE::caller(++$i);
         if ($i > 2) {
@@ -81,6 +82,7 @@ sub global_phase () {
             my @next = CORE::caller($i - 2);
             if (
                 $top[3] eq '(eval)'
+                && $next[3] =~ /::END$/
                 && $top[2] == $next[2]
                 && $top[1] eq $next[1]
                 && $top[0] eq 'main'
@@ -149,8 +151,8 @@ built in variable from newer perls.
 
 =head1 BUGS
 
-There are tricks that can be played with B that would fool this
-module for the INIT phase.
+There are tricks that can be played with B or XS that would fool this
+module for the INIT and END phase.
 
 =head1 AUTHOR
 
