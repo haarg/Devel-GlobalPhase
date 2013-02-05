@@ -1,5 +1,6 @@
 # We need to do things in all phases without interference, so avoid
 # using Test::More and just implement our own simple test routines.
+package t::test;
 use strict;
 $|++;
 {
@@ -12,6 +13,14 @@ $|++;
 my $had_error;
 my $test_num;
 my $done;
+BEGIN {
+    if ($INC{'threads.pm'}) {
+        require threads::shared;
+        threads::shared::share(\$had_error);
+        threads::shared::share(\$test_num);
+        threads::shared::share(\$done);
+    }
+}
 END { $? = $done ? 0 : 1 }
 sub ::ok ($;$) {
   $had_error++, print "not " if !$_[0];
