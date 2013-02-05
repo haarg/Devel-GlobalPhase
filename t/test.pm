@@ -23,15 +23,17 @@ BEGIN {
 }
 END { $? = $done ? 0 : 1 }
 sub ::ok ($;$) {
-  $had_error++, print "not " if !$_[0];
+  print "not " if !$_[0];
   print "ok " . ++$test_num;
   print " - $_[1]" if defined $_[1];
+  print " # TODO $::TODO" if defined $::TODO;
+  $had_error++ if !$_[0] && !$::TODO;
   print "\n";
   !!$_[0]
 }
 sub ::is ($$;$) {
   my $out = ::ok $_[0] eq $_[1], $_[2]
-    or warn "# $_[0] ne $_[1]\n";
+    or print "# $_[0] ne $_[1]\n";
   $out;
 }
 sub ::skip ($;$) {
