@@ -18,28 +18,29 @@ BEGIN {
 use t::test;
 use Devel::GlobalPhase;
 
-      { is global_phase, 'RUN',     'RUN in thread ' . threads->tid };
-END   { is global_phase, 'END',     'END in thread ' . threads->tid };
+sub t_name () { threads->tid ? 'thread' : 'main program' }
+
+      { is global_phase, 'RUN',     'pre-thread RUN in ' . t_name };
+END   { is global_phase, 'END',     'pre-thread END in ' . t_name };
 our $global = Test::Scope::Guard->new(sub {
-      { is global_phase, 'DESTRUCT', 'pre-thread global destroy -> DESTRUCT in ' . (threads->tid ? 'thread' : 'main_program') };
+      { is global_phase, 'DESTRUCT', 'pre-thread global destroy -> DESTRUCT in ' . t_name }
       threads->tid or done_testing;
 });
 
 {
     package CloneTest;
     sub CLONE
-      { ::is ::global_phase, 'RUN',     'CLONE -> RUN in thread ' . threads->tid };
+      { ::is ::global_phase, 'RUN',     'CLONE -> RUN in ' . ::t_name };
 }
 our $clonetest = bless {}, 'CloneTest';
 
 threads->create(sub {
 eval q[
-      { is global_phase, 'RUN',     'RUN in thread' };
-END   { is global_phase, 'END',     'END in thread' };
+      { is global_phase, 'RUN',     'RUN in ' . t_name };
+END   { is global_phase, 'END',     'END in ' . t_name };
 our $global_thread = Test::Scope::Guard->new(sub {
-      { is global_phase, 'DESTRUCT', 'in thread global destroy -> DESTRUCT in thread ' . (threads->tid ? 'thread' : 'main_program') };
+      { is global_phase, 'DESTRUCT', 'in thread global destroy -> DESTRUCT in ' . t_name };
 });
 1; # don't leak guard
 ];
 })->join;
-
