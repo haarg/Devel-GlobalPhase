@@ -55,7 +55,6 @@ else {
 }
 END { $global_phase = 'END' }
 
-use Carp ();
 sub global_phase () {
     if ($global_phase eq 'START') {
         # we use a CHECK block to set this as well, but we can't force
