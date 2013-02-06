@@ -5,7 +5,6 @@ use warnings;
 our $VERSION = '0.001000';
 $VERSION = eval $VERSION;
 
-use B ();
 use base 'Exporter';
 
 our @EXPORT = qw(global_phase);
@@ -36,6 +35,7 @@ END_CODE
 }
 else {
     eval <<'END_CODE' or die $@;
+use B ();
 
 my $global_phase = 'START';
 if (B::main_start()->isa('B::NULL')) {
