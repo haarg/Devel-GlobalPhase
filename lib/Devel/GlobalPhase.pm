@@ -98,6 +98,10 @@ sub global_phase () {
 sub Tie::GlobalPhase::TIESCALAR { bless \(my $s), $_[0]; }
 sub Tie::GlobalPhase::STORE { die "Modification of a read-only value attempted"; }
 *Tie::GlobalPhase::FETCH = \&global_phase;
+sub Tie::GlobalPhase::DESTROY {
+    untie ${^GLOBAL_PHASE};
+    *{^GLOBAL_PHASE} = \(global_phase);
+}
 
 sub tie_global_phase {
     unless (defined ${^GLOBAL_PHASE}) {
