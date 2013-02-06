@@ -2,7 +2,7 @@ package Devel::GlobalPhase;
 use strict;
 use warnings;
 
-our $VERSION = '0.001000';
+our $VERSION = '0.002000';
 $VERSION = eval $VERSION;
 
 use base 'Exporter';
