@@ -128,7 +128,7 @@ Devel::GlobalPhase - Detect perl's global phase on older perls.
 
 =head1 DESCRIPTION
 
-This gives access to L<perlvar/${^GLOBAL_PHASE}|${^GLOBAL_PHASE}>
+This gives access to L<${^GLOBAL_PHASE}|perlvar/${^GLOBAL_PHASE}>
 in versions of perl that don't provide it. The built in variable will be
 used if it is available.
 
