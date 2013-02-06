@@ -1,6 +1,7 @@
 BEGIN { require 5.008 }
 use strict;
 use ExtUtils::MakeMaker;
+use Config;
 
 my %WriteMakefileArgs = (
     NAME            => 'Devel::GlobalPhase',
@@ -8,6 +9,9 @@ my %WriteMakefileArgs = (
     LICENSE         => 'perl',
     ABSTRACT_FROM   => 'lib/Devel/GlobalPhase.pm',
     VERSION_FROM    => 'lib/Devel/GlobalPhase.pm',
+    PREREQ_PM       => {
+        $Config{useithreads} ? (threads => 1.07) : (),
+    },
     META_MERGE => {
         resources => {
             repository => 'git://github.com/haarg/Devel-GlobalPhase.git',

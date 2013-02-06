@@ -12,6 +12,7 @@ BEGIN {
     print "1..0 # SKIP threads.pm not installed\n";
     exit 0;
   }
+  threads->VERSION(1.07);
 }
 
 use t::test;
