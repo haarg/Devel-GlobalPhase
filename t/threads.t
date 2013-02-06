@@ -26,13 +26,8 @@ our $global = Test::Scope::Guard->new(sub {
       { is global_phase, 'DESTRUCT', 'pre-thread global destroy -> DESTRUCT in ' . t_name }
       threads->tid or done_testing;
 });
-
-{
-    package CloneTest;
-    sub CLONE
-      { ::is ::global_phase, 'RUN',     'CLONE -> RUN in ' . ::t_name };
-}
-our $clonetest = bless {}, 'CloneTest';
+sub CloneTest::CLONE
+      { is global_phase, 'RUN',     'CLONE -> RUN in ' . t_name };
 
 threads->create(sub {
 eval q[
