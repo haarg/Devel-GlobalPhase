@@ -15,7 +15,7 @@ BEGIN {
   threads->VERSION(1.07);
 }
 
-use t::test;
+use t::test tests => 8;
 use Devel::GlobalPhase;
 
 sub t_name () { threads->tid ? 'thread' : 'main program' }

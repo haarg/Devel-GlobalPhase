@@ -1,5 +1,5 @@
 use strict;
-use t::test;
+use t::test tests => 7;
 
 use Devel::GlobalPhase;
 use B ();

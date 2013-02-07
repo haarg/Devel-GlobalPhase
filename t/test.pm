@@ -12,16 +12,25 @@ $|++;
 
 my $had_error;
 my $test_num;
-my $done;
+my $plan;
 BEGIN {
     if ($INC{'threads.pm'}) {
         require threads::shared;
         threads::shared::share(\$had_error);
         threads::shared::share(\$test_num);
-        threads::shared::share(\$done);
+        threads::shared::share(\$plan);
     }
 }
-END { $? = $done ? 0 : 1 }
+END { $? = $had_error ? 1 : 0 }
+
+sub import {
+    shift;
+    my %args = @_;
+    if ($args{tests}) {
+        $plan = $args{tests};
+        print "1..$plan\n";
+    }
+}
 sub ::ok ($;$) {
   print "not " if !$_[0];
   print "ok " . ++$test_num;
@@ -45,14 +54,22 @@ sub ::skip ($;$) {
   !!$_[0]
 }
 sub ::done_testing () {
-  print "1..$test_num\n";
+  if ($plan) {
+    if ($plan != $test_num) {
+      require POSIX;
+      POSIX::_exit(1);
+    }
+  }
+  else {
+    print "1..$test_num\n";
+  }
+
   if ($had_error) {
     require POSIX;
     POSIX::_exit(1);
   }
   else {
     $? = 0;
-    $done = 1;
   }
 }
 

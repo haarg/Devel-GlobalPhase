@@ -1,5 +1,5 @@
 use strict;
-use t::test;
+use t::test tests => 3;
 BEGIN {
   require B;
   B::minus_c();

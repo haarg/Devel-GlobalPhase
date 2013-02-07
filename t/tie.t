@@ -1,5 +1,5 @@
 use strict;
-use t::test;
+use t::test tests => 6;
 
 use Devel::GlobalPhase -var;
 

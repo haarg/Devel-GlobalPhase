@@ -1,5 +1,5 @@
 use strict;
-use t::test;
+use t::test tests => 3;
 
 require Devel::GlobalPhase;
 Devel::GlobalPhase->import;
