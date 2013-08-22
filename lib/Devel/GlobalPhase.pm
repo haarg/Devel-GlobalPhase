@@ -56,14 +56,17 @@ else {
 END { $global_phase = 'END' }
 
 sub global_phase () {
-    if ($global_phase eq 'START') {
+    if ($global_phase eq 'DESTRUCT') {
+        # no need for extra checks at this point
+    }
+    elsif ($global_phase eq 'START') {
         # we use a CHECK block to set this as well, but we can't force
         # ours to run before other CHECKS
         if (!B::main_root()->isa('B::NULL') && B::main_cv()->DEPTH == 0) {
             $global_phase = 'CHECK';
         }
     }
-    elsif ($global_phase ne 'DESTRUCT' && B::main_start()->isa('B::NULL')) {
+    elsif (${B::main_cv()} == 0) {
         $global_phase = 'DESTRUCT';
     }
     elsif ($global_phase eq 'INIT' && B::main_cv()->DEPTH > 0) {
