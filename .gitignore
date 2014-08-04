@@ -4,6 +4,7 @@
 /Makefile.old
 /MANIFEST
 /MANIFEST.bak
+/MANIFEST.SKIP
 /blib/
 /pm_to_blib
 /.build
@@ -11,4 +12,6 @@ cover_db
 nytprof*
 /inc/
 README
-/Devel-GlobalPhase-*
+/Distar
+/Devel-GlobalPhase-*.tar.gz
+/Devel-GlobalPhase-*/
