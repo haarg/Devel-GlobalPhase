@@ -1,3 +1,7 @@
+ - small optimizations
+ - include README in dist
+ - some additional testing
+
 v0.002001   Feb 7, 2013
  - Fix test exit values on win32
 
