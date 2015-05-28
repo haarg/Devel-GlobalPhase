@@ -72,7 +72,7 @@ sub global_phase () {
     elsif ($global_phase eq 'INIT' && B::main_cv()->DEPTH > 0) {
         $global_phase = 'RUN';
     }
-    if ($global_phase eq 'RUN') {
+    if ($global_phase eq 'RUN' && $^S) {
         # END blocks are FILO so we can't install one to run first.
         # only way to detect END reliably seems to be by using caller.
         # I hate this but it seems to be the best available option.
