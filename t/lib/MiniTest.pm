@@ -1,6 +1,6 @@
 # We need to do things in all phases without interference, so avoid
 # using Test::More and just implement our own simple test routines.
-package t::test;
+package MiniTest;
 use strict;
 $|++;
 {

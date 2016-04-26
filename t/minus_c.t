@@ -1,5 +1,6 @@
 use strict;
-use t::test tests => 3;
+use lib 't/lib';
+use MiniTest tests => 3;
 BEGIN {
   require B;
   B::minus_c();
