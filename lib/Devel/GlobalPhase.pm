@@ -36,7 +36,7 @@ sub global_phase () {
     return ${^GLOBAL_PHASE};
 }
 
-sub tie_global_phase {}
+sub tie_global_phase { 1 }
 
 1;
 END_CODE
@@ -106,18 +106,23 @@ sub global_phase () {
     return $global_phase;
 }
 
-sub Tie::GlobalPhase::TIESCALAR { bless \(my $s), $_[0]; }
-sub Tie::GlobalPhase::STORE { die "Modification of a read-only value attempted"; }
-*Tie::GlobalPhase::FETCH = \&global_phase;
-sub Tie::GlobalPhase::DESTROY {
-    untie ${^GLOBAL_PHASE};
-    *{^GLOBAL_PHASE} = \(global_phase);
+{
+    package # hide
+      Devel::GlobalPhase::_Tie;
+    sub TIESCALAR { bless \(my $s), $_[0]; }
+    sub STORE { die "Modification of a read-only value attempted"; }
+    *FETCH = \&Devel::GlobalPhase::global_phase;
+    sub DESTROY {
+        untie ${^GLOBAL_PHASE};
+        *{^GLOBAL_PHASE} = \(Devel::GlobalPhase::global_phase);
+    }
 }
 
 sub tie_global_phase {
     unless (defined ${^GLOBAL_PHASE}) {
-        tie ${^GLOBAL_PHASE}, 'Tie::GlobalPhase';
+        tie ${^GLOBAL_PHASE}, 'Devel::GlobalPhase::_Tie';
     }
+    1;
 }
 
 1;
