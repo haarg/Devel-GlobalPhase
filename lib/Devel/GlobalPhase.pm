@@ -9,16 +9,24 @@ use base 'Exporter';
 
 our @EXPORT = qw(global_phase);
 
+sub global_phase ();
+sub tie_global_phase;
+
 sub import {
-    my $class = $_[0];
-    for (1..$#_) {
-        if ($_[$_] eq '-var') {
-            splice @_, $_, 1;
-            $class->tie_global_phase;
-            return if (@_ == 1);
-        }
+    my $class = shift;
+    my $var;
+    my @imports = map {
+        ($_ && $_ eq '-var') ? do {
+            $var = 1;
+            ();
+        } : $_;
+    } @_;
+    if (@imports || !$var) {
+        Exporter::export_to_level($class, 1, @imports);
     }
-    goto &Exporter::import;
+    if ($var) {
+        tie_global_phase;
+    }
 }
 
 if (defined ${^GLOBAL_PHASE}) {
