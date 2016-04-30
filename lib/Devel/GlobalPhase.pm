@@ -13,116 +13,123 @@ sub global_phase ();
 sub tie_global_phase;
 
 sub import {
-    my $class = shift;
-    my $var;
-    my @imports = map {
-        ($_ && $_ eq '-var') ? do {
-            $var = 1;
-            ();
-        } : $_;
-    } @_;
-    if (@imports || !$var) {
-        Exporter::export_to_level($class, 1, @imports);
-    }
-    if ($var) {
-        tie_global_phase;
-    }
+  my $class = shift;
+  my $var;
+  my @imports = map {
+    ($_ && $_ eq '-var') ? do {
+      $var = 1;
+      ();
+    } : $_;
+  } @_;
+  if (@imports || !$var) {
+    Exporter::export_to_level($class, 1, @imports);
+  }
+  if ($var) {
+    tie_global_phase;
+  }
 }
 
 if (defined ${^GLOBAL_PHASE}) {
-    eval <<'END_CODE' or die $@;
+  eval <<'END_CODE' or die $@;
 
 sub global_phase () {
-    return ${^GLOBAL_PHASE};
+  return ${^GLOBAL_PHASE};
 }
 
 sub tie_global_phase { 1 }
 
 1;
+
 END_CODE
 }
 else {
-    eval <<'END_CODE' or die $@;
+  eval <<'END_CODE' or die $@;
+
 use B ();
 
 my $global_phase = 'START';
 if (B::main_start()->isa('B::NULL')) {
-    # loaded during initial compile
-    eval <<'END_EVAL' or die $@;
-        CHECK { $global_phase = 'CHECK' }
-        # try to install an END block as late as possible so it will run first.
-        INIT { eval q(END { $global_phase = 'END' }) }
-        # INIT is FIFO so we can force our sub to be first
-        unshift @{ B::init_av()->object_2svref }, sub { $global_phase = 'INIT' };
-        1;
+  # loaded during initial compile
+  eval <<'END_EVAL' or die $@;
+
+    CHECK { $global_phase = 'CHECK' }
+    # try to install an END block as late as possible so it will run first.
+    INIT  { eval q( END { $global_phase = 'END' } ) }
+    # INIT is FIFO so we can force our sub to be first
+    unshift @{ B::init_av()->object_2svref }, sub { $global_phase = 'INIT' };
+
+    1;
+
 END_EVAL
 }
 else {
-    # loaded during runtime
-    $global_phase = 'RUN';
+  # loaded during runtime
+  $global_phase = 'RUN';
 }
 END { $global_phase = 'END' }
 
 sub global_phase () {
-    if ($global_phase eq 'DESTRUCT') {
-        # no need for extra checks at this point
+  if ($global_phase eq 'DESTRUCT') {
+    # no need for extra checks at this point
+  }
+  elsif ($global_phase eq 'START') {
+    # we use a CHECK block to set this as well, but we can't force
+    # ours to run before other CHECKS
+    if (!B::main_root()->isa('B::NULL') && B::main_cv()->DEPTH == 0) {
+      $global_phase = 'CHECK';
     }
-    elsif ($global_phase eq 'START') {
-        # we use a CHECK block to set this as well, but we can't force
-        # ours to run before other CHECKS
-        if (!B::main_root()->isa('B::NULL') && B::main_cv()->DEPTH == 0) {
-            $global_phase = 'CHECK';
-        }
-    }
-    elsif (${B::main_cv()} == 0) {
-        $global_phase = 'DESTRUCT';
-    }
-    elsif ($global_phase eq 'INIT' && B::main_cv()->DEPTH > 0) {
-        $global_phase = 'RUN';
-    }
-    if ($global_phase eq 'RUN' && $^S) {
-        # END blocks are FILO so we can't install one to run first.
-        # only way to detect END reliably seems to be by using caller.
-        # I hate this but it seems to be the best available option.
-        # The top two frames will be an eval and the END block.
-        my $i;
-        1 while CORE::caller(++$i);
-        if ($i > 2) {
-            my @top = CORE::caller($i - 1);
-            my @next = CORE::caller($i - 2);
-            if (
-                $top[3] eq '(eval)'
-                && $next[3] =~ /::END$/
-                && $top[2] == $next[2]
-                && $top[1] eq $next[1]
-                && $top[0] eq 'main'
-                && $next[0] eq 'main'
-            ) {
-                $global_phase = 'END';
-            }
-        }
-    }
+  }
+  elsif (${B::main_cv()} == 0) {
+    $global_phase = 'DESTRUCT';
+  }
+  elsif ($global_phase eq 'INIT' && B::main_cv()->DEPTH > 0) {
+    $global_phase = 'RUN';
+  }
 
-    return $global_phase;
+  if ($global_phase eq 'RUN' && $^S) {
+    # END blocks are FILO so we can't install one to run first.
+    # only way to detect END reliably seems to be by using caller.
+    # I hate this but it seems to be the best available option.
+    # The top two frames will be an eval and the END block.
+    my $i;
+    1 while CORE::caller(++$i);
+    if ($i > 2) {
+      my @top = CORE::caller($i - 1);
+      my @next = CORE::caller($i - 2);
+      if (
+        $top[3] eq '(eval)'
+        && $next[3] =~ /::END$/
+        && $top[2] == $next[2]
+        && $top[1] eq $next[1]
+        && $top[0] eq 'main'
+        && $next[0] eq 'main'
+      ) {
+        $global_phase = 'END';
+      }
+    }
+  }
+
+  return $global_phase;
 }
 
 {
-    package # hide
-      Devel::GlobalPhase::_Tie;
-    sub TIESCALAR { bless \(my $s), $_[0]; }
-    sub STORE { die "Modification of a read-only value attempted"; }
-    *FETCH = \&Devel::GlobalPhase::global_phase;
-    sub DESTROY {
-        untie ${^GLOBAL_PHASE};
-        *{^GLOBAL_PHASE} = \(Devel::GlobalPhase::global_phase);
-    }
+  package # hide
+    Devel::GlobalPhase::_Tie;
+
+  sub TIESCALAR { bless \(my $s), $_[0]; }
+  sub STORE { die "Modification of a read-only value attempted"; }
+  *FETCH = \&Devel::GlobalPhase::global_phase;
+  sub DESTROY {
+    untie ${^GLOBAL_PHASE};
+    *{^GLOBAL_PHASE} = \(Devel::GlobalPhase::global_phase);
+  }
 }
 
 sub tie_global_phase {
-    unless (defined ${^GLOBAL_PHASE}) {
-        tie ${^GLOBAL_PHASE}, 'Devel::GlobalPhase::_Tie';
-    }
-    1;
+  unless (defined ${^GLOBAL_PHASE}) {
+    tie ${^GLOBAL_PHASE}, 'Devel::GlobalPhase::_Tie';
+  }
+  1;
 }
 
 1;
