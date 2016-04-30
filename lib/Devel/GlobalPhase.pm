@@ -29,8 +29,9 @@ sub import {
   }
 }
 
-if (defined ${^GLOBAL_PHASE}) {
-  eval <<'END_CODE' or die $@;
+BEGIN {
+  if (defined ${^GLOBAL_PHASE}) {
+    eval <<'END_CODE' or die $@;
 
 sub global_phase () {
   return ${^GLOBAL_PHASE};
@@ -41,9 +42,9 @@ sub tie_global_phase { 1 }
 1;
 
 END_CODE
-}
-else {
-  eval <<'END_CODE' or die $@;
+  }
+  else {
+    eval <<'END_CODE' or die $@;
 
 use B ();
 
@@ -134,6 +135,7 @@ sub tie_global_phase {
 
 1;
 END_CODE
+  }
 }
 
 1;
