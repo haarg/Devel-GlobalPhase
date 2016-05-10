@@ -129,13 +129,18 @@ sub global_phase () {
   sub STORE { die sprintf "Modification of a read-only value attempted at %s line %s.\n", (caller(0))[1,2]; }
   *FETCH = \&Devel::GlobalPhase::global_phase;
   sub DESTROY {
-    untie ${^GLOBAL_PHASE};
-    *{^GLOBAL_PHASE} = \(Devel::GlobalPhase::global_phase);
+    my $tied = tied ${^GLOBAL_PHASE};
+    if ($tied && $tied == $_[0]) {
+      untie ${^GLOBAL_PHASE};
+      my $phase = Devel::GlobalPhase::global_phase;
+      Internals::SvREADONLY($phase, 1) if defined &Internals::SvREADONLY;
+      *{^GLOBAL_PHASE} = \$phase;
+    }
   }
 }
 
 sub tie_global_phase {
-  unless (defined ${^GLOBAL_PHASE}) {
+  unless ('Devel::GlobalPhase::_Tie' eq ref tied ${^GLOBAL_PHASE}) {
     tie ${^GLOBAL_PHASE}, 'Devel::GlobalPhase::_Tie';
   }
   1;
