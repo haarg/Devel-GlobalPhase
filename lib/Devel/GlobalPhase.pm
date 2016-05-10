@@ -92,11 +92,19 @@ sub global_phase () {
     # only way to detect END reliably seems to be by using caller.
     # I hate this but it seems to be the best available option.
     # The top two frames will be an eval and the END block.
-    my $i;
-    1 while CORE::caller(++$i);
-    if ($i > 2) {
-      my @top = CORE::caller($i - 1);
-      my @next = CORE::caller($i - 2);
+    my $i = 0;
+    $i++ while CORE::caller($i + 1);
+    if ($i < 1) {
+      # there should always be the sub call and an eval frame ($^S is true).
+      # this will only happen if we're in END, but the outer frames are broken.
+      $global_phase = 'END';
+    }
+    elsif ($i > 1) {
+      # If we're ENDing due to an exit or die in a sub generated in an eval,
+      # these caller calls can cause a segfault.  I can't find a way to detect
+      # this.
+      my @top = CORE::caller($i);
+      my @next = CORE::caller($i - 1);
       if (
         $top[3] eq '(eval)'
         && $next[3] =~ /::END$/
@@ -118,7 +126,7 @@ sub global_phase () {
     Devel::GlobalPhase::_Tie;
 
   sub TIESCALAR { bless \(my $s), $_[0]; }
-  sub STORE { die "Modification of a read-only value attempted"; }
+  sub STORE { die sprintf "Modification of a read-only value attempted at %s line %s.\n", (caller(0))[1,2]; }
   *FETCH = \&Devel::GlobalPhase::global_phase;
   sub DESTROY {
     untie ${^GLOBAL_PHASE};
