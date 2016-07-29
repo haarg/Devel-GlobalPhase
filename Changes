@@ -1,14 +1,16 @@
+Revision history for Devel::GlobalPhase
+
 0.002002 - 2014-08-16
- - small optimizations
- - include README in dist
- - some additional testing
+  - small optimizations
+  - include README in dist
+  - some additional testing
 
 v0.002001   Feb 7, 2013
- - Fix test exit values on win32
+  - Fix test exit values on win32
 
 v0.002000   Feb 6, 2013
- - Fix running under threads
- - Fix early destruction of global var in ealier perl versions
+  - Fix running under threads
+  - Fix early destruction of global var in ealier perl versions
 
 v0.001000   Feb 3, 2013
- - Initial release
+  - Initial release
