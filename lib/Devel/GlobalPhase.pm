@@ -192,7 +192,7 @@ built in variable from newer perls.
 
 =head1 BUGS
 
-There are tricks that can be played with B or XS that would fool this
+There are tricks that can be played with L<B> or XS that would fool this
 module for the INIT and END phase.
 
 =head1 AUTHOR
