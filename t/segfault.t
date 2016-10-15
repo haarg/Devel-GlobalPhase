@@ -5,6 +5,9 @@ use MiniTest tests => 4;
 use File::Spec;
 use IPC::Open3;
 
+local $TODO = "can't prevent possible segfault on perl 5.8.9 to 5.12"
+  if "$]" >= 5.008009 && "$]" < 5.014000;
+
 for my $layers ( 0, 3 ) {
   my $pid = open3 my $stdin, my $stdout, undef,
     $^X, (map "-I$_", @INC), 't/segfault.pl', "--layers=$layers"
