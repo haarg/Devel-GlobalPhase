@@ -1,5 +1,6 @@
 Revision history for Devel::GlobalPhase
 
+0.002003 - 2016-10-15
   - stop relying on . being in @INC in tests
   - prevent modification of emulated ${^GLOBAL_PHASE} during global destruction
   - report modification of emulated ${^GLOBAL_PHASE} more correctly
