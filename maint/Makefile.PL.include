@@ -4,6 +4,6 @@ use Distar 0.001;
 
 author 'haarg - Graham Knop (cpan:HAARG) <haarg@haarg.org>';
 
-manifest_include t => 'test.pm';
+manifest_include t => 'segfault.pl';
 
 1;
