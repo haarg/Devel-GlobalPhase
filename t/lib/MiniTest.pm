@@ -23,6 +23,8 @@ BEGIN {
 }
 END { $? = $had_error ? 1 : 0 }
 
+our $TODO;
+
 sub import {
     shift;
     my %args = @_;
@@ -30,22 +32,27 @@ sub import {
         $plan = $args{tests};
         print "1..$plan\n";
     }
+    my $caller;
+    no strict 'refs';
+    *{"${caller}::TODO"} = \$TODO;
+    *{"${caller}::$_"} = \&{$_}
+      for qw(ok is skip done_testing);
 }
-sub ::ok ($;$) {
+sub ok ($;$) {
   print "not " if !$_[0];
   print "ok " . ++$test_num;
   print " - $_[1]" if defined $_[1];
-  print " # TODO $::TODO" if defined $::TODO;
-  $had_error++ if !$_[0] && !$::TODO;
+  print " # TODO $TODO" if defined $TODO;
+  $had_error++ if !$_[0] && !$TODO;
   print "\n";
   !!$_[0]
 }
-sub ::is ($$;$) {
-  my $out = ::ok $_[0] eq $_[1], $_[2]
+sub is ($$;$) {
+  my $out = ok $_[0] eq $_[1], $_[2]
     or print "# $_[0] ne $_[1]\n";
   $out;
 }
-sub ::skip ($;$) {
+sub skip ($;$) {
   print "ok " . ++$test_num;
   for (0..($_[2]||0)) {
     print " # $_[1]" if defined $_[1];
@@ -53,7 +60,7 @@ sub ::skip ($;$) {
   }
   !!$_[0]
 }
-sub ::done_testing () {
+sub done_testing () {
   if ($plan) {
     if ($plan != $test_num) {
       require POSIX;
