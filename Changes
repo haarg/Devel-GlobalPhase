@@ -1,5 +1,7 @@
 Revision history for Devel::GlobalPhase
 
+  - fix TODO in tests
+
 0.002003 - 2016-10-15
   - stop relying on . being in @INC in tests
   - prevent modification of emulated ${^GLOBAL_PHASE} during global destruction

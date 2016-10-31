@@ -34,7 +34,7 @@ sub import {
     }
     my $caller;
     no strict 'refs';
-    *{"${caller}::TODO"} = \$TODO;
+    *{"${caller}::TODO"} = *TODO;
     *{"${caller}::$_"} = \&{$_}
       for qw(ok is skip done_testing);
 }

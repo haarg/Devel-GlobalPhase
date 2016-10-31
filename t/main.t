@@ -11,7 +11,7 @@ INIT  { is global_phase, 'INIT',    'INIT'    };
       { is global_phase, 'RUN',     'RUN'     };
 END   { is global_phase, 'END',     'END'     };
 unshift @{ B::end_av()->object_2svref }, sub {
-    local $::TODO = "can't reliably detect anonymous END blocks"
+    local $TODO = "can't reliably detect anonymous END blocks"
       unless defined ${^GLOBAL_PHASE};
       { is global_phase, 'END',     'END via B' };
 };
