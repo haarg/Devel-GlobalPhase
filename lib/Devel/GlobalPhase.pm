@@ -93,27 +93,32 @@ sub global_phase () {
     # I hate this but it seems to be the best available option.
     # The top two frames will be an eval and the END block.
     my $i = 0;
-    $i++ while CORE::caller($i + 1);
+    $i++ while defined CORE::caller($i + 1);
     if ($i < 1) {
       # there should always be the sub call and an eval frame ($^S is true).
       # this will only happen if we're in END, but the outer frames are broken.
       $global_phase = 'END';
     }
     elsif ($i > 1) {
-      # If we're ENDing due to an exit or die in a sub generated in an eval,
-      # these caller calls can cause a segfault.  I can't find a way to detect
-      # this.
-      my @top = CORE::caller($i);
-      my @next = CORE::caller($i - 1);
-      if (
-        $top[3] eq '(eval)'
-        && $next[3] =~ /::END$/
-        && $top[2] == $next[2]
-        && $top[1] eq $next[1]
-        && $top[0] eq 'main'
-        && $next[0] eq 'main'
-      ) {
+      my $top = CORE::caller($i);
+      my $next = CORE::caller($i - 1);
+      if (!$top || !$next) {
         $global_phase = 'END';
+      }
+      elsif ($top eq 'main' && $next eq 'main') {
+        # If we're ENDing due to an exit or die in a sub generated in an eval,
+        # these caller calls can cause a segfault.  I can't find a way to detect
+        # this.
+        my @top = CORE::caller($i);
+        my @next = CORE::caller($i - 1);
+        if (
+          $top[3] eq '(eval)'
+          && $next[3] =~ /::END$/
+          && $top[2] == $next[2]
+          && $top[1] eq $next[1]
+        ) {
+          $global_phase = 'END';
+        }
       }
     }
   }
