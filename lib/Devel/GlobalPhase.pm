@@ -135,8 +135,14 @@ sub global_phase () {
     Devel::GlobalPhase::_Tie;
 
   sub TIESCALAR { bless \(my $s), $_[0]; }
-  sub STORE { die sprintf "Modification of a read-only value attempted at %s line %s.\n", (caller(0))[1,2]; }
-  *FETCH = \&Devel::GlobalPhase::global_phase;
+  sub STORE {
+    die sprintf "Modification of a read-only value attempted at %s line %s.\n", (caller(0))[1,2];
+  }
+  sub FETCH {
+    return undef
+      if caller eq 'Devel::GlobalDestruction';
+    Devel::GlobalPhase::global_phase;
+  }
   sub DESTROY {
     my $tied = tied ${^GLOBAL_PHASE};
     if ($tied && $tied == $_[0]) {
