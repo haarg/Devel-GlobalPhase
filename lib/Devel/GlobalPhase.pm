@@ -10,11 +10,13 @@ use base 'Exporter';
 our @EXPORT = qw(global_phase);
 
 BEGIN {
+  *_CALLER_CAN_SEGFAULT = ("$]" >= 5.008009 && "$]" < 5.018000) ? sub(){1} : sub(){0};
   *_NATIVE_GLOBAL_PHASE = "$]" >= 5.014000 ? sub(){1} : sub(){0};
 }
 
 sub global_phase ();
 sub tie_global_phase;
+sub _refresh_END ();
 
 sub import {
   my $class = shift;
@@ -28,6 +30,7 @@ sub import {
   if (@imports || !$var) {
     Exporter::export_to_level($class, 1, @imports);
   }
+  _refresh_END;
   if ($var) {
     tie_global_phase;
   }
@@ -42,6 +45,8 @@ sub global_phase () {
 }
 
 sub tie_global_phase { 1 }
+
+sub _refresh_END () { 1 }
 
 1;
 
@@ -59,7 +64,7 @@ if (B::main_start()->isa('B::NULL')) {
 
     CHECK { $global_phase = 'CHECK' }
     # try to install an END block as late as possible so it will run first.
-    INIT  { eval q( END { $global_phase = 'END' } ) }
+    INIT  { my $capture = $global_phase; eval q( END { $global_phase = 'END' } ) }
     # INIT is FIFO so we can force our sub to be first
     unshift @{ B::init_av()->object_2svref }, sub { $global_phase = 'INIT' };
 
@@ -72,6 +77,11 @@ else {
   $global_phase = 'RUN';
 }
 END { $global_phase = 'END' }
+
+sub _refresh_END () {
+  my $capture = $global_phase;
+  eval q[ END { $global_phase = 'END' } ];
+}
 
 sub global_phase () {
   if ($global_phase eq 'DESTRUCT') {
@@ -88,10 +98,12 @@ sub global_phase () {
     $global_phase = 'DESTRUCT';
   }
   elsif ($global_phase eq 'INIT' && B::main_cv()->DEPTH > 0) {
+    _refresh_END;
     $global_phase = 'RUN';
   }
 
-  if ($global_phase eq 'RUN' && $^S) {
+  # this is slow and can segfault, so skip it
+  if (!_CALLER_CAN_SEGFAULT && $global_phase eq 'RUN' && $^S) {
     # END blocks are FILO so we can't install one to run first.
     # only way to detect END reliably seems to be by using caller.
     # I hate this but it seems to be the best available option.
@@ -207,8 +219,21 @@ built in variable from newer perls.
 
 =head1 BUGS
 
+=over 4
+
+=item *
+
 There are tricks that can be played with L<B> or XS that would fool this
 module for the INIT and END phase.
+
+=item *
+
+During an C<END {}> block created at runtime after this module is loaded, the
+phase may be reported as C<RUN>.  While this could be made more accurate, it
+would slow down the module significantly during the RUN phase, and has the
+potential to segfault perl.
+
+=back
 
 =head1 AUTHOR
 
