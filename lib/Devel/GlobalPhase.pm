@@ -9,6 +9,10 @@ use base 'Exporter';
 
 our @EXPORT = qw(global_phase);
 
+BEGIN {
+  *_NATIVE_GLOBAL_PHASE = "$]" >= 5.014000 ? sub(){1} : sub(){0};
+}
+
 sub global_phase ();
 sub tie_global_phase;
 
@@ -30,7 +34,7 @@ sub import {
 }
 
 BEGIN {
-  if (defined ${^GLOBAL_PHASE}) {
+  if (_NATIVE_GLOBAL_PHASE) {
     eval <<'END_CODE' or die $@;
 
 sub global_phase () {
