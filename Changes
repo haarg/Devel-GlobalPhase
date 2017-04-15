@@ -1,5 +1,6 @@
 Revision history for Devel::GlobalPhase
 
+0.003000 - 2017-04-15
   - fix threaded tests when . missing from @INC
   - prevent this module from slowing down Devel::GlobalDestruction
   - let END detection be slightly less accurate to increase performance and
