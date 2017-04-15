@@ -1,5 +1,10 @@
 Revision history for Devel::GlobalPhase
 
+  - fix threaded tests when . missing from @INC
+  - prevent this module from slowing down Devel::GlobalDestruction
+  - let END detection be slightly less accurate to increase performance and
+    avoid a potential segfault
+
 0.002004 - 2016-10-31
   - fix TODO in tests (and thus failures on perl < 5.14)
 
