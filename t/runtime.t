@@ -11,6 +11,9 @@ eval q[
     is global_phase, 'RUN',      'RUN';
   }
   END {
+    local $TODO = "can't reliably detect runtime END blocks"
+      if Devel::GlobalPhase::_CALLER_CAN_SEGFAULT
+        && !Devel::GlobalPhase::_NATIVE_GLOBAL_PHASE;
     is global_phase, 'END',      'END';
   }
   our $global = Test::Scope::Guard->new(sub {
