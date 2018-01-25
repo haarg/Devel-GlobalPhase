@@ -3,12 +3,6 @@
 package MiniTest;
 use strict;
 $|++;
-{
-  package
-    Test::Scope::Guard;
-  sub new { my ($class, $code) = @_; bless [$code], $class; }
-  sub DESTROY { my $self = shift; $self->[0]->() }
-}
 
 my $had_error;
 my $test_num;

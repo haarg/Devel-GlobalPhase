@@ -1,6 +1,7 @@
 use strict;
 use lib 't/lib';
 use MiniTest tests => 7;
+use Test::Scope::Guard;
 
 use Devel::GlobalPhase;
 use B ();

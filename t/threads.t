@@ -17,6 +17,7 @@ BEGIN {
 
 use lib 't/lib';
 use MiniTest tests => 8;
+use Test::Scope::Guard;
 use Devel::GlobalPhase;
 
 sub t_name () { threads->tid ? 'thread' : 'main program' }

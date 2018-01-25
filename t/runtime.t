@@ -1,6 +1,7 @@
 use strict;
 use lib 't/lib';
 use MiniTest tests => 3;
+use Test::Scope::Guard;
 
 require Devel::GlobalPhase;
 Devel::GlobalPhase->import;
