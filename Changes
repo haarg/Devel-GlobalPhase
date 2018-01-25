@@ -1,5 +1,8 @@
 Revision history for Devel::GlobalPhase
 
+  - better diagnostics on test failures
+  - fix runtime test on perl 5.8.9 through 5.12.x
+
 0.003001 - 2018-01-24
   - fix segfault test on Windows
 
