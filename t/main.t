@@ -12,9 +12,8 @@ INIT  { is global_phase, 'INIT',    'INIT'    };
       { is global_phase, 'RUN',     'RUN'     };
 END   { is global_phase, 'END',     'END'     };
 unshift @{ B::end_av()->object_2svref }, sub {
-    local $TODO = "can't reliably detect anonymous END blocks"
-      if Devel::GlobalPhase::_CALLER_CAN_SEGFAULT
-        && !Devel::GlobalPhase::_NATIVE_GLOBAL_PHASE;
+  local $TODO = "can't reliably detect anonymous END blocks"
+    if !Devel::GlobalPhase::_NATIVE_GLOBAL_PHASE;
       { is global_phase, 'END',     'END via B' };
 };
 our $global = Test::Scope::Guard->new(sub {
