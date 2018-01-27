@@ -6,7 +6,7 @@ use Test::Scope::Guard;
 require Devel::GlobalPhase;
 Devel::GlobalPhase->import;
 
-eval q[
+eval '#line '.(__LINE__+1).q[ "].__FILE__.q["].q[
   {
     is global_phase, 'RUN',      'RUN';
   }

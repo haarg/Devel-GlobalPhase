@@ -32,7 +32,7 @@ sub CloneTest::CLONE
       { is global_phase, 'RUN',     'CLONE -> RUN in ' . t_name };
 
 threads->create(sub {
-eval q[
+eval '#line '.(__LINE__+1).q[ "].__FILE__.q["].q[
       { is global_phase, 'RUN',     'RUN in ' . t_name };
 END   { is global_phase, 'END',     'END in ' . t_name };
 our $global_thread = Test::Scope::Guard->new(sub {
