@@ -2,6 +2,7 @@
 # using Test::More and just implement our own simple test routines.
 package MiniTest;
 use strict;
+use warnings;
 $|++;
 
 my $had_error;
@@ -26,7 +27,7 @@ sub import {
         $plan = $args{tests};
         print "1..$plan\n";
     }
-    my $caller;
+    my $caller = caller;
     no strict 'refs';
     *{"${caller}::TODO"} = *TODO;
     *{"${caller}::$_"} = \&{$_}
