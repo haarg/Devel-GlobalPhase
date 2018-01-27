@@ -1,5 +1,9 @@
 Revision history for Devel::GlobalPhase
 
+  - fix testing on perl 5.8
+  - fix threading tests
+  - improved error reporting in tests
+
 0.003002 - 2018-01-25
   - better diagnostics on test failures
   - fix runtime test on perl 5.8.9 through 5.12.x
