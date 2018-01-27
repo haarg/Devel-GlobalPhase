@@ -1,5 +1,6 @@
 Revision history for Devel::GlobalPhase
 
+0.003003 - 2018-01-27
   - fix testing on perl 5.8
   - fix threading tests
   - improved error reporting in tests
